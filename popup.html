@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div id="init" class="loadcont showing">
+            <progress class="pure-material-progress-linear" />
+        </div>
+        <div id="errorcont" class="hiding">
+            <p id="error">An Error Occured</p>
+            <a href="#">Reload</a>
+        </div>
+        <div class="tabs hiding">
+            <div id="tab1" style="text-align: center;" class="tab active">Search Keywords</div>
+            <!-- <div id="tab2" class="tab">All Reports</div> -->
+        </div>
+        <br>
+        <div class="tab1items hiding">
+            <h1>My Keyword planner </h1>
+            <br>
+            <div class="inputcont">
+                <label for="">
+                    <p>Enter products or services closely related to your business
+                    </p>
+
+                </label>
+                <p>Searching All Available dates</p>
+                <br>
+                <div class="inputplace">
+                    <ul class="keywords">
+                        <!-- <div class="keyword">
+                            <p>love dreams <span class="del">&#x2715;</span></p>
+                        </div> -->
+
+
+
+                    </ul>
+                    <input id="keywordinput" tabindex="-1" type="text"
+                        placeholder='Try "meal Delivery" or "leather Boots"'>
+
+                </div>
+            </div>
+            <br>
+            <div class="loadcont">
+                <progress class="pure-material-progress-linear" />
+
+            </div>
+            <br>
+            <div class="buttonCont">
+                <button disabled id="generate">Generate Report</button>
+            </div>
+
+        </div>
+
+        <div class="tab2items hiding"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script src="./helperfunctions.js"></script>
+    <script src="./popup.js"></script>
+</body>
+
+</html>

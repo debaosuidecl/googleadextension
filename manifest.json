@@ -1,0 +1,42 @@
+{
+    "manifest_version": 3,
+    "name": "GoogleAdVol",
+    "description": "GOOGLE AD VOLUME SEARCH",
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting",
+        "tabs",
+        "downloads",
+        "debugger"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "/images/ads.png",
+            "32": "/images/ads.png",
+            "48": "/images/ads.png",
+            "128": "/images/ads.png"
+        }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "style.css",
+                "popup.js",
+                "helperfunctions.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "host_permissions": [
+        "http://*/",
+        "https://*/"
+    ],
+    "version": "1.0.0"
+}
