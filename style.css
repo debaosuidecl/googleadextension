@@ -124,6 +124,18 @@
 .buttonCont{
 
 }
+.buttonCont2 button{
+    width: 150px;
+    padding: 10px 4px;
+    border: none;
+
+    background: red;
+    color: white;
+
+    border-radius: 10px;
+    box-shadow: 1px 0px 5px red;
+    cursor: pointer;
+}
 
 .buttonCont button{
     width: 100%;
@@ -162,6 +174,9 @@
     padding: 20px;
 }
 
+#error{
+    color: red;
+}
 
 .pure-material-progress-linear {
     -webkit-appearance: none;
@@ -210,6 +225,8 @@
 .pure-material-progress-linear:indeterminate::-ms-fill {
     animation-name: none;
 }
+
+
 
 @keyframes pure-material-progress-linear {
     0% {

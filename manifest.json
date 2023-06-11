@@ -27,7 +27,8 @@
             "resources": [
                 "style.css",
                 "popup.js",
-                "helperfunctions.js"
+                "helperfunctions.js",
+                "axios.js"
             ],
             "matches": [
                 "<all_urls>"

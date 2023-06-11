@@ -21,8 +21,8 @@
             <a href="#">Reload</a>
         </div>
         <div class="tabs hiding">
-            <div id="tab1" style="text-align: center;" class="tab active">Search Keywords</div>
-            <!-- <div id="tab2" class="tab">All Reports</div> -->
+            <!-- <div id="tab1" style="text-align: center;" class="tab active">Search Keywords</div>
+            <div id="tab2" class="tab">All Reports</div> -->
         </div>
         <br>
         <div class="tab1items hiding">
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <br>
-            <div class="loadcont">
+            <div id="loadcont" class="loadcont">
                 <progress class="pure-material-progress-linear" />
 
             </div>
@@ -60,11 +60,21 @@
                 <button disabled id="generate">Generate Report</button>
             </div>
 
+            <br>
+
+            <div class="buttonCont2 hiding cancelcont">
+                <button  id="cancelgeneration">Stop Generation</button>
+            </div>
+            <br>
+
+
+
+            <a href="https://docs.google.com/spreadsheets/d/138hLBPL_QWZhJgv4nCZtZDYSGpCyxmVnwdbTyl2qhlA/edit#gid=0">Click here to access the google sheets report</a>
         </div>
 
         <div class="tab2items hiding"></div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script src="./axios.js"></script>
     <script src="./helperfunctions.js"></script>
     <script src="./popup.js"></script>
 </body>

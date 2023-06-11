@@ -1,271 +1,274 @@
+const domain = "http://localhost:5000";
+
 // event listeners
+
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-    sendResponse("seen")
-    // console.log()
-    console.log(message, 'message in content')
-    if (message.type === "ping") {
-        return console.log("pong")
-    }
-    if (message.type === "start-keywordplanner") {
-        localStorage.setItem("status", "processing")
-        localStorage.setItem("data", JSON.stringify(message))
-
-        keywordplaninit(message)
-        return
-
-    }
-    if (message.type === "status-check") {
-        let status = localStorage.getItem("status")
-        console.log(status, 15)
-        chrome.runtime.sendMessage({
-            data: {
-                status
-            }
-        });
-        return
-    }
-
-
-    if (message.type === "download-data") {
-        let data = localStorage.getItem("data")
-        if (!data) return console.log("data not found");
-
-        data = JSON.parse(data);
-        let downloadItem = message.data
-        // console.log(status, 15)
-        chrome.runtime.sendMessage({
-            type: "download-final",
-            data: {
-                downloadItem,
-                data
-            }
-        });
-
-        return
-
-
-    }
-
-
-
-
-})
-async function delay(ms) {
-    return new Promise((res, rej) => {
-        setTimeout(() => {
-            res('done')
-        }, ms)
+  sendResponse("seen");
+  // console.log()
+  console.log(message, "message in content");
+  if (message.type === "ping") {
+    return console.log("pong");
+  }
+  if (message.type === "cancel") {
+    location.reload();
+    return;
+  }
+  if (message.type === "start-keywordplanner") {
+    location.reload();
+    return;
+  }
+  if (message.type === "status-check") {
+    let status = localStorage.getItem("status");
+    console.log(status, 15);
+    chrome.runtime.sendMessage({
+      data: {
+        status,
+      },
     });
+    return;
+  }
+
+  if (message.type === "download-data") {
+    // let data = localStorage.getItem("data");
+    // if (!data) return console.log("data not found");
+
+    // data = JSON.parse(data);
+    let downloadItem = message.data;
+    // console.log(status, 15)
+    chrome.runtime.sendMessage({
+      type: "download-final",
+      data: {
+        downloadItem,
+        data: "",
+      },
+    });
+
+    return;
+  }
+});
+async function delay(ms) {
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      res("done");
+    }, ms);
+  });
 }
 function errorhandler(message = "") {
-    localStorage.setItem("status", "error")
-    console.log(message, 'DEM DON SEND ME OOOO')
-    localStorage.setItem("errormessage", message)
+  localStorage.setItem("status", "error");
+  console.log(message, "DEM DON SEND ME OOOO");
+  localStorage.setItem("errormessage", message);
 
-    localStorage.setItem("PROCESSINGALREADY", "no")
+  localStorage.setItem("PROCESSINGALREADY", "no");
 
-    chrome.runtime.sendMessage({
-        data: {
-            status: "error"
-        }
-    });
+  chrome.runtime.sendMessage({
+    data: {
+      status: "error",
+    },
+  });
 }
-
 
 // let PROCESSINGALREADY = false;
 
 async function keywordplaninit(data) {
-    // let PROCESSINGALREADY = localStorage.getItem("PROCESSINGALREADY")
-    // if (PROCESSINGALREADY === "yes") return console.log("it is already processing")
-    // localStorage.setItem("PROCESSINGALREADY", "yes")
+  // let PROCESSINGALREADY = localStorage.getItem("PROCESSINGALREADY")
+  // if (PROCESSINGALREADY === "yes") return console.log("it is already processing")
+  // localStorage.setItem("PROCESSINGALREADY", "yes")
 
-    if (!data) {
-        // fet data from local storage and status
+  // if (!data) {
+  //     // fet data from local storage and status
 
-        data = localStorage.getItem("data")
+  //     data = localStorage.getItem("data")
 
-        data = JSON.parse(data)
-    }
+  //     data = JSON.parse(data)
+  // }
 
-    let status = localStorage.getItem("status");
+  // let status = localStorage.getItem("status");
 
-    if (status !== "processing") {
+  data = await fetch(`${domain}/api/keyword`);
+  data = await data.json();
+  console.log(data, "after request");
+  //   data = data.data;
+  let status = data.scheduled === false ? "none" : "processing";
+  console.log(data, 87);
+  if (status !== "processing") {
+    return console.log("status is not processing");
+  }
 
-        return console.log("status is not processing")
-    }
+  chrome.runtime.sendMessage({
+    data: {
+      status: "processing",
+    },
+  });
 
-    chrome.runtime.sendMessage({
-        data: {
-            status: "processing"
-        }
-    });
+  console.log("processing request");
 
+  // click on light bulb to start
 
+  await checkIfElisthere(".lightbulb-img");
+  const searchstart = document.querySelector(".lightbulb-img");
 
-    console.log("processing request")
+  if (!searchstart) {
+    errorhandler("could not start keyword planner");
+    return false;
+  }
 
-    // click on light bulb to start
+  searchstart.click();
 
-    await checkIfElisthere(".lightbulb-img")
-    const searchstart = document.querySelector('.lightbulb-img')
+  await delay(1000);
 
-    if (!searchstart) {
-        errorhandler("could not start keyword planner")
-        return false;
-    }
+  const remainder = await enterkeywords(data);
+  console.log(remainder, "remainder");
+  //   await delay(30000);
+  localStorage.setItem("temp-remainder", JSON.stringify(remainder));
 
-    searchstart.click();
+  // select country
 
-    await delay(1000);
+  // select location button
+  document.querySelector(".location-button").click();
 
-    const remainder = await enterkeywords(data.data)
-    console.log(remainder, "remainder")
+  console.log("time to submit");
 
-    localStorage.setItem("temp-remainder", JSON.stringify(remainder))
+  await delay(1000);
+  const result = await enterlocations(data);
+  console.log(result, "result of locations");
+  if (!result) {
+    errorhandler("could not enter all locations");
+    return false;
+  }
+  localStorage.setItem("status", "processing");
 
-    // select country
+  chrome.runtime.sendMessage({
+    data: {
+      status: "processing",
+    },
+  });
 
-    // select location button
-    document.querySelector(".location-button").click()
+  document.querySelector(".submit-button").click();
 
-    console.log("time to submit");
+  await delay(1000);
 
-    await delay(1000);
-    const result = await enterlocations(data.data)
-    console.log(result, "result of locations")
-    if (!result) {
-        errorhandler("could not enter all locations")
-        return false;
-    }
-    localStorage.setItem("status", "processing")
+  //   return;
+  const calenderButton = await checkIfElisthere(`[icon="calendar_today"]`);
 
-    chrome.runtime.sendMessage({
-        data: {
-            status: "processing"
-        }
-    });
+  if (!calenderButton) {
+    errorhandler("could not find calendar button");
+    return false;
+  }
+  document.querySelector(`[icon="calendar_today"]`).click();
 
+  await delay(1000);
+  const allAvailableButton = await checkIfElisthere(
+    `[aria-label="Date range, All available"]`
+  );
 
-    document.querySelector(".submit-button").click()
+  if (!allAvailableButton) {
+    errorhandler("could not find calendar button");
+    return false;
+  }
 
+  document.querySelector(`[aria-label="Date range, All available"]`).click();
 
-    const downloadavailable = await checkIfElisthere(".expand-collapse-all")
+  await delay(1000);
+  const downloadavailable = await checkIfElisthere(".expand-collapse-all");
 
-    console.log(downloadavailable, "can find expand all")
+  console.log(downloadavailable, "can find expand all");
 
+  if (!downloadavailable) {
+    errorhandler("could find download trigger");
+    console.log("could not find expand");
+    return false;
+  }
 
-    if (!downloadavailable) {
-        errorhandler("could find download trigger")
-        console.log("could not find expand")
-        return false;
-    }
+  document.querySelector(".download.download-menu material-button").click();
+  const csvdownloaditem = checkIfElisthere(
+    "material-select-item .menu-item-label-section"
+  );
+  await delay(1000);
+  if (!csvdownloaditem) {
+    errorhandler("could not find csv item");
+    console.log("could not find csv item");
+    return false;
+  }
 
-    document.querySelector('.download.download-menu material-button').click();
-    const csvdownloaditem = checkIfElisthere("material-select-item .menu-item-label-section");
-    await delay(1000);
-    if (!csvdownloaditem) {
-        errorhandler("could not find csv item")
-        console.log("could not find csv item")
-        return false;
-    }
-
-
-    document.querySelector("material-select-item .menu-item-label-section").click()
-    localStorage.setItem("PROCESSINGALREADY", "no")
-
-
-    // document.querySelector(".expand-collapse-all").click()
-
-    // chrome.tabs.query({ active: true }, function (tabs) {
-    //     chrome.debugger.attach({ tabId: tabs[0].id }, "1.0");
-    //     // chrome.debugger.sendCommand({ tabId: tabs[0].id }, 'Input.insertText', { text: '1234567'});
-    //     chrome.debugger.sendCommand({ tabId: tabs[0].id }, 'Input.dispatchKeyEvent', { type: 'char', text: "love" });
-
-    //     // chrome.debugger.sendCommand({ tabId: tabs[0].id }, 'Input.dispatchKeyEvent', { type: 'char', text: "123456789"  });
-    //     // chrome.debugger.sendCommand({ tabId: tabs[0].id }, 'Input.dispatchKeyEvent', { type: 'keyDown', windowsVirtualKeyCode:13, nativeVirtualKeyCode : 13, macCharCode: 13  });
-    //     chrome.debugger.detach({ tabId: tabs[0].id });
-    // });
-
-
-
+  document
+    .querySelector("material-select-item .menu-item-label-section")
+    .click();
+  localStorage.setItem("PROCESSINGALREADY", "no");
 }
 
 async function enterkeywords(data) {
-    const keywords = data.keywords
-    const remainingValues = [];
-    for (let i = 0; i < keywords.length; i++) {
-        const word = keywords[i]
+  const keywords = data.keywords;
+  const remainingValues = [];
+  const el = document.querySelector(".search-input");
 
-        if (i >= 10) {
-            remainingValues.push(word)
-        }
-        const el = document.querySelector('.search-input');
-        el.value = `${word},`
-        el.focus();
-        document.execCommand('insertText', false, 'extra');
-        el.dispatchEvent(new Event('change', { bubbles: true }))
+  for (let i = 0; i < keywords.length; i++) {
+    const word = keywords[i];
 
+    if (i >= 10) {
+      remainingValues.push(word);
     }
-
-
-    return remainingValues
+    el.value = `${word},`;
+    el.focus();
+    document.execCommand("insertText", false, "extra");
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  el.value = ``;
+  //   el.focus();
+  return remainingValues;
 }
 
 async function checkIfElisthere(selector, tries = 0) {
+  elexists = document.querySelector(selector);
+  if (tries > 20) return false;
+  if (elexists) return true;
 
-    elexists = document.querySelector(selector);
-    if (tries > 20) return false;
-    if (elexists) return true;
+  console.log(selector, "not there, trying in a second. tries:=> ", tries);
 
-    console.log(selector, 'not there, trying in a second. tries:=> ', tries)
-
-    await delay(1000);
-    return checkIfElisthere(selector, tries + 1)
+  await delay(1000);
+  return checkIfElisthere(selector, tries + 1);
 }
 async function enterlocations(data) {
-    const locations = data.locations;
-    const el = document.querySelector('.suggest-input-container input');
-    await delay(800);
-    // delete previously selected locations
+  const locations = data.locations;
+  const el = document.querySelector(".suggest-input-container input");
+  await delay(800);
+  // delete previously selected locations
 
-    const removeicons = document.querySelectorAll(".remove .icon")
+  const removeicons = document.querySelectorAll(".remove .icon");
 
-    for (let i = 0; i < removeicons.length; i++) {
-        const rem = removeicons[i];
+  for (let i = 0; i < removeicons.length; i++) {
+    const rem = removeicons[i];
 
-        rem.click();
+    rem.click();
+  }
+  await delay(1000);
+  console.log("enter the dragon", locations);
+  for (let i = 0; i < locations.length; i++) {
+    const location = locations[i];
+    console.log(location, 187);
+    el.focus();
+    document.execCommand("insertText", false, location);
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    await checkIfElisthere(".location-info");
+    try {
+      document.querySelector(".location-info").click();
+    } catch (error) {
+      console.log(error);
+      return false;
     }
-    await delay(1000);
-    console.log("enter the dragon", locations)
-    for (let i = 0; i < locations.length; i++) {
-        const location = locations[i];
-        console.log(location, 187)
-        el.focus();
-        document.execCommand('insertText', false, location);
-        el.dispatchEvent(new Event('change', { bubbles: true }))
-        await checkIfElisthere(".location-info")
-        try {
-            document.querySelector(".location-info").click()
+    await delay(500);
+  }
 
-        } catch (error) {
-            console.log(error);
-            return false;
-        }
-        await delay(500);
-    }
+  const btns = document.querySelectorAll("material-dialog .btn-yes");
 
-    const btns = document.querySelectorAll("material-dialog .btn-yes")
+  if (btns.length === 4) {
+    btns[3].click();
 
-    if (btns.length === 4) {
-
-        btns[3].click();
-
-        return true;
-    } else {
-        return false
-    }
+    return true;
+  } else {
+    return false;
+  }
 }
 
-keywordplaninit()
+keywordplaninit();
 
-console.log("connected")
+console.log("connected");
