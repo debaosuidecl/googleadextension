@@ -1,0 +1,12 @@
+{
+    "type": "service_account",
+    "project_id": "foxnews-blog",
+    "private_key_id": "16a16c652f0c63e8203b969e814f21bfb6c38921",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCklXP4u+sA1InY\nN1OnugcmO5hL2qjLyxvzb3pmNfOL1JuB3oZpgr6mttFcWOoHMZffQPJELFuu+ok/\nA7B/YKy7K1sBhcIuKcV2s8+nTz+uwOrNGNybm7zGSqFSy9jftTl6wo/+1qo8mkMS\nGuAXs+yeOqSyzJIxA8FcSSHLxeGS12dZHDXuUTaobjVt8xdRKMVPQhLkG/JWw+ZH\nwPGxBRB1l7zgTZDUilBIWExXhuW6p8sHdFd89IH48CD8ctUDp1y48f1Wfb4m7GEp\noJ4ffZQRhAM6NWffnTq8TRtYIkJlNVq3n60Y8Ha72TV0TqhCTT03+drFWxKrWdly\nlImoOQb/AgMBAAECggEARoheGPy/q61qHaUoTrskkTf8/pUIvb2fjuX5eJAqfYRx\n2Gg7BkCn3959PqxELy0LvvugV6MC76wi4UR9gTk3DUd5St+95fa0zzgkB7mouwWm\nGptK/8zwS7J0DH2bxdNufLOg7j+k2S/rCnlGDCJphy3uo0mUZTkMxrX4q9Fz6G+C\nZCl1yof64cjAP54X3oYztwy4kXcfYROlSd6cdFXX2kxIFJlDzJzYLi442WrcnREo\n35dTk8tH+7CP+7mx/idwZZmzXkU2sB2Y0RODQvxo+BmxusxM4oIF2gvs92pwPSoV\nt9x32YCuzeBVeOz65Xkk/bGLvJFSxo078wqfVVpawQKBgQDoohT6QI9YzhyU8zUy\nyfBFk59ES7VEyZ0uhE+BKQS5wCPqQFVvraXdyEzI2CiRfNZnLKl1h2OjZHG2toce\nOItWNS8ac9d4MXC2gTfRkzPDLouhj/ETGZO7GEjqTuO8NrAW/3kQ0jR/KYoOUjil\n5uQbnGwQ9yi+kPjjWQ4guEANcQKBgQC1HY221r1jL+km65lPcJ19TAeVm4VsfNgy\n9t699mXXECA3wV9AXMFdtX2opyqlw/RM7tyStFUF9zPpyZQoxFn3C+G43bjgiOwn\nXHrFO7vz4g1+OgIM/ux96IHpp457nLK0A9IZn8gWSJPr21m7982XTy9FuuZfCsF7\nr0I+3QjjbwKBgAJzAmmIGHpE4UQoM10vhxoUbc7YRTZOMRt2RSgE+InEHhyvRLcC\nSwbEvxo2PGcbu14muDoGjOQBgLj9vvpwefcUZESRB6m6S4eAYMgSFq9tZAb1bwJW\neJm1rb7ZycgHg18anXmx3N+h3lQ8RWBpx+kKgpDDKWioOhaar21kwzfhAoGAO7v+\nlHIozoDrxfFohCHhX4Tm73n2vHxEljKD7mVI23CvH5SAhOrSv8RvKGPSFhAWEBWr\n3Brr++a3UYExg2yXO3rIvL8sDao7MRQ4TbrQ17QTvTEGoiCmATThPB4OSUi6S9MC\nxX7EcE0JtH2JEAy/2wq7zaTB/FDA1blNAQzHtLMCgYBK6AiZvOdpo8yrwECzHtTF\n6iv+7HoZeiGZAw8/beebBGvFNzl/GKkAAcmJUO8v7PT1nttDbwh9OWUjuPSo4uuP\nb1mVJ9EknYKO7zNmmH8n4yDHquNSo1cmjBY/QJc5kFRWQQDUh29/H6OjwtQkyI9T\nAE6VmODvBlTYjZi1dPcipA==\n-----END PRIVATE KEY-----\n",
+    "client_email": "creator-app@foxnews-blog.iam.gserviceaccount.com",
+    "client_id": "107438906654809525566",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/creator-app%40foxnews-blog.iam.gserviceaccount.com"
+  }
