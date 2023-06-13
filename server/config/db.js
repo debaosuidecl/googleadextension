@@ -3,11 +3,11 @@
 // this is where we do the mongodb connection
 
 const mongoose = require('mongoose');
-
-const config = require('config');
+const path = require("path")
+// const config = require('config');
 const dotenv = require("dotenv");
 
-dotenv.config();
+dotenv.config({path: path.join(__dirname, "..", ".env")});
 
 // const db = config.get('mongoURI');
 const db = process.env.mongoURI;
