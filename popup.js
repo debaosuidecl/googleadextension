@@ -1,5 +1,5 @@
 // state
-const domain = `http://localhost:5000`;
+const domain = `http://localhost:4000`;
 let error = "";
 let keywords = [
   "Traeger",
@@ -36,9 +36,14 @@ const loadcont = document.querySelector("#loadcont");
 const generateButton = document.querySelector("#generate");
 const tabselement = document.querySelector(".tabs");
 const tab1items = document.querySelector(".tab1items");
+const tab2items = document.querySelector(".tab2items");
 const initloader = document.querySelector("#init");
 const cancelgeneration = document.querySelector("#cancelgeneration");
 const cancelcont = document.querySelector(".cancelcont");
+const homenav = document.querySelector("#home")
+const livenav = document.querySelector("#live")
+const savednav = document.querySelector("#saved")
+const savedlist = document.querySelector("#saveddata")
 //  eventlistners
 
 keywordinputelement.addEventListener("keydown", (e) => {
@@ -138,6 +143,24 @@ cancelgeneration.addEventListener("click", async (e) => {
     initloader.classList.add("hiding");
   }
 });
+
+homenav.addEventListener("click", (e)=>{
+  tab2items.classList.add("hiding");
+  tab1items.classList.add("hiding");
+  initloader.classList.remove("hiding")
+  savednav.classList.remove("active")
+  homenav.classList.add("active")
+  getServerData()
+})
+savednav.addEventListener("click", (e)=>{
+  tab1items.classList.add("hiding");
+  tab2items.classList.remove("hiding");
+  [homenav, livenav].forEach(v=> v.classList.remove("active"))
+  savednav.classList.add("active")
+  getSavedData()
+})
+
+// chrome listener
 
 chrome.runtime?.onMessage?.addListener(function (
   message,
@@ -274,6 +297,56 @@ async function getServerData() {
   }
 }
 
+async function getSavedData() {
+  let result = {};
+
+  try {
+    initloader.classList.remove("hiding");
+
+    result = await axios.get(`${domain}/api/keyword/saved-files`);
+  } catch (error) {
+    console.log(error);
+    error = "Could Not Fetch Keyword Saved Data";
+    initloader.classList.add("hiding");
+
+    return setErrorUI("Could Not Fetch Keyword Saved Data");
+  } finally{
+    initloader.classList.add("hiding");
+
+  }
+
+  console.log(result.data);
+
+  const savedKeywordDataSet = result.data;
+
+
+  savedlist.innerHTML = ""
+
+
+
+  for(let i=0; i < savedKeywordDataSet.length; i++)
+    {
+      const savedkeyword = savedKeywordDataSet[i]
+      savedlist.innerHTML += `
+        <li><p>Report Created on : ${formatdate(savedkeyword.createdAt)}</p><p><a href="${domain}/api/keyword/download/${savedkeyword.path}?date=${formatdate(savedkeyword.createdAt)}">Download</a></p></li>
+      `
+
+    }
+}
+
+function _2digits(number){
+  let string = number.toString();
+
+  if(string.length <= 1){
+    return `0${string}`
+  }
+  return string;
+}
+
+function formatdate(date){
+
+  return _2digits(new Date(date).getMonth()+1) + "/" + _2digits(new Date(date).getDate()) + "/" + new Date(date).getFullYear()
+}
 function statusCheck() {
   chrome.tabs?.query({ active: true, currentWindow: true }, function (tabs) {
     // Send a message to the content script of the active tab

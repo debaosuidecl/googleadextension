@@ -12,7 +12,14 @@ const Keyword = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    downloadablefiles: [String],
+    downloadablefiles: [{
+      path: {
+        type: String,
+      },
+      location: {
+        type: String
+      }
+    }],
     status: {
       type: String,
     },
@@ -23,6 +30,8 @@ const Keyword = new mongoose.Schema(
       type: String,
     },
     locations: [String],
+    constantlocations : [String],
+    constantkeywords : [String],
     keywords: [String],
     // keywords: [String],
   },

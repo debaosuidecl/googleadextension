@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
+const SavedKeywordFileModel = require("../models/SavedKeywordFile.model");
 function generateRandomVariable(length) {
   const buffer = crypto.randomBytes(length);
   const randomVariable = buffer.toString("hex");
@@ -15,6 +16,42 @@ router.get("/", async (req, res) => {
     const keyword = await Keyword.findOne();
     console.log(keyword, 8);
     res.json(keyword);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      error: true,
+    });
+  }
+});
+router.get("/saved-files", async (req, res) => {
+  try {
+    const saved = await SavedKeywordFileModel.find();
+    console.log(saved, 8);
+    res.json(saved);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      error: true,
+    });
+  }
+});
+router.get("/download/:filename", async (req, res) => {
+  try {
+    // fs.readFileSync(path.join(__dirname, "..", "cacheres", req.params.filename))
+    const filename = req.params.filename;
+		const filejoin = path.resolve(__dirname, "..", "cacheres", filename + ".csv");
+		const file = fs.createReadStream(filejoin);
+		console.log(filename, "the file path", filejoin);
+
+		res.setHeader("Content-Type", "application/csv");
+		// res.setHeader(`Content-Disposition", "filename=cached-pdf-${req.query.date.replace(/\//g, "")}.csv`);
+    const fileName = `cached-pdf-${req.query.date.replace(/\//g, "")}.csv`;
+
+    // Set the Content-Disposition header
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  
+  
+		file.pipe(res);
   } catch (error) {
     console.log(error);
     res.status(400).send({
@@ -35,6 +72,8 @@ router.post("/schedule/:id", async (req, res) => {
       const newkeyword = await new Keyword({
         keywordid: id,
         locations,
+        constantlocations: locations,
+        constantkeywords: keywords,
         keywords,
         scheduled: true,
         savingtogooglesheet: false,
@@ -52,6 +91,10 @@ router.post("/schedule/:id", async (req, res) => {
           keywords,
           keywordid: id,
           locations,
+          constantlocations: locations,
+          constantkeywords: keywords,
+
+
           error: "",
           downloadablefiles: [],
         },
@@ -108,13 +151,22 @@ router.post("/save-keyword/:id", async (req, res) => {
   console.log("full data", data);
   const keywordStructure = await Keyword.findOne().lean();
 
-  const keywordsEvaluated = keywordStructure.keywords.slice(0, 10);
+  // const keywordsEvaluated = keywordStructure.keywords.slice(0, 10);
+  
+  const currentLocation = keywordStructure.locations[0]
+  let newlocations = keywordStructure.locations.slice(1);
+  let keywordsRemaining = keywordStructure.keywords
 
-  const keywordsRemaining = keywordStructure.keywords.slice(10);
+  if(newlocations.length <=0){
+
+    keywordsRemaining = keywordStructure.keywords.slice(10);
+    newlocations = keywordStructure.constantlocations;
+  }
+
   //   const downloadableItems = keywordStructure
   const url = downloaditem.finalUrl;
 
-  console.log({ keywordsEvaluated, keywordsRemaining });
+  console.log({  keywordsRemaining });
 
   if (!keywordStructure) {
     return res.status(404).send({ message: "no keyword" });
@@ -123,7 +175,7 @@ router.post("/save-keyword/:id", async (req, res) => {
   //   if (keywords)
   let pathtoscrub = generateRandomVariable(30) + ".csv";
 
-  keywordStructure.downloadablefiles.push(pathtoscrub);
+  keywordStructure.downloadablefiles.push({path: pathtoscrub, location: currentLocation});
 
   try {
     console.log("trying to download url");
@@ -146,6 +198,8 @@ router.post("/save-keyword/:id", async (req, res) => {
     console.log(error);
   }
 
+
+
   const updatedKeyword = await Keyword.findOneAndUpdate(
     {},
     {
@@ -154,6 +208,7 @@ router.post("/save-keyword/:id", async (req, res) => {
       scheduled: keywordsRemaining.length <= 0 ? false : true,
       downloadablefiles: keywordStructure.downloadablefiles,
       savingtogooglesheet: keywordsRemaining.length <= 0,
+      locations: newlocations,
     },
     {
       new: true,

@@ -13,19 +13,25 @@
 
     <div class="container">
 
-        <div id="init" class="loadcont showing">
-            <progress class="pure-material-progress-linear" />
-        </div>
+       
         <div id="errorcont" class="hiding">
             <p id="error">An Error Occured</p>
             <a href="#">Reload</a>
         </div>
+
         <div class="tabs hiding">
             <!-- <div id="tab1" style="text-align: center;" class="tab active">Search Keywords</div>
             <div id="tab2" class="tab">All Reports</div> -->
         </div>
+    
         <br>
+        <div class="navigation">  <a  id="home" class="active">Home</a> | <a id="saved" href="#">View Saved Reports</a>  | <a id="live" href="https://docs.google.com/spreadsheets/d/138hLBPL_QWZhJgv4nCZtZDYSGpCyxmVnwdbTyl2qhlA/edit#gid=0">Google Sheets</a> </div>
+        <br>
+        <div id="init" class="loadcont showing">
+            <progress class="pure-material-progress-linear" />
+        </div>
         <div class="tab1items hiding">
+
             <h1>My Keyword planner </h1>
             <br>
             <div class="inputcont">
@@ -69,10 +75,19 @@
 
 
 
-            <a href="https://docs.google.com/spreadsheets/d/138hLBPL_QWZhJgv4nCZtZDYSGpCyxmVnwdbTyl2qhlA/edit#gid=0">Click here to access the google sheets report</a>
+           <br>
+           <!-- <div class=""> </div> -->
         </div>
 
-        <div class="tab2items hiding"></div>
+        <div class="tab2items hiding">
+                <h1>My Saved Files</h1>
+                <br/>
+                <ul id="saveddata">
+                    <li>
+                        <p></p>
+                    </li>
+                </ul>
+        </div>
     </div>
     <script src="./axios.js"></script>
     <script src="./helperfunctions.js"></script>

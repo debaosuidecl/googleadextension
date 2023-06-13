@@ -3,6 +3,9 @@ const { google } = require("googleapis");
 const spreadsheetId = "138hLBPL_QWZhJgv4nCZtZDYSGpCyxmVnwdbTyl2qhlA";
 const path = require("path");
 const fs = require("fs");
+const { parse } = require("json2csv");
+const SavedKeywordFileModel = require("../models/SavedKeywordFile.model");
+
 // object to access information
 async function clearSheet() {
   const auth = new google.auth.GoogleAuth({
@@ -59,8 +62,20 @@ async function googlesheet() {
   await clearSheet();
   console.timeEnd("clearing cells");
   //   return;
+  const constantkeywordsMap ={}
+
+  for(let i=0; i < keyword.constantkeywords.length; i++){
+    const key = keyword.constantkeywords[i];
+
+    constantkeywordsMap[key.toLowerCase()] = 1;
+  }
+  let fields = []
+  let opts = {}
+  let arraytotransform = []
+
   for (let i = 0; i < downloadablefiles.length; i++) {
-    const filepath = downloadablefiles[i];
+    const filepath = downloadablefiles[i].path;
+    const location = downloadablefiles[i].location
     let data = [];
     let file = fs.readFileSync(
       path.join(__dirname, "..", "files", filepath),
@@ -68,16 +83,55 @@ async function googlesheet() {
     );
 
     let reformedfilearray = file.split("\n");
-
+    
     for (let j = 0; j < reformedfilearray.length; j++) {
       if (i > 0 && j == 0) {
+        
         continue;
       }
       const row = reformedfilearray[j].replace(/\x00/g, "");
-      data.push(row.split(","));
+      let arrayrow = row.split(",")
+      if( i == 0 && j == 0){
+        arrayrow.unshift("location")
+        fields = arrayrow;
+
+
+         opts = { fields };
+
+
+         data.push(arrayrow);
+
+
+      } else{
+        arrayrow.unshift(location)
+        const keyw = arrayrow[1].toLowerCase();
+        if (!constantkeywordsMap.hasOwnProperty(keyw)){
+          continue
+        }
+
+              // console.log(arrayrow, 86)
+      data.push(arrayrow);
+      let objectToPush = {}
+      for(let i=0; i <fields.length; i++){
+          const field = fields[i]
+          objectToPush[field] = arrayrow[i]
+      }
+      arraytotransform.push(objectToPush)
+
+      }
+
+      // if(j === 2) return;
     }
 
+    // console.log(data, 102)
+
+
+    // return;
+
     // console.log("formed file", data, "formed file");
+
+    // cachecsv
+    // return;
     const request = {
       spreadsheetId,
       range: "Sheet1", // Replace with the sheet name or range where you want to append the data
@@ -89,6 +143,12 @@ async function googlesheet() {
     console.log(`${response.data.updates.updatedCells} cells appended.`);
   }
 
+  const csv1 = parse(arraytotransform, opts);
+  fs.writeFileSync(
+    path.join(__dirname, "..", `cacheres`, `${keyword.keywordid}.csv`),
+    csv1
+  );
+    // return console.log("stop here")
   const updatedKeyword = await Keyword.findOneAndUpdate(
     {},
     {
@@ -100,6 +160,12 @@ async function googlesheet() {
   );
 
   console.log(updatedKeyword, "updated");
+
+  const updateCache = await new SavedKeywordFileModel({
+    path: keyword.keywordid
+  }).save()
+
+  console.log(updateCache)
 }
 
 module.exports = googlesheet;

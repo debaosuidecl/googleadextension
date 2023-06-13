@@ -1,4 +1,4 @@
-const domain = "http://localhost:5000";
+const domain = "http://localhost:4000";
 
 // event listeners
 
@@ -70,19 +70,7 @@ function errorhandler(message = "") {
 // let PROCESSINGALREADY = false;
 
 async function keywordplaninit(data) {
-  // let PROCESSINGALREADY = localStorage.getItem("PROCESSINGALREADY")
-  // if (PROCESSINGALREADY === "yes") return console.log("it is already processing")
-  // localStorage.setItem("PROCESSINGALREADY", "yes")
 
-  // if (!data) {
-  //     // fet data from local storage and status
-
-  //     data = localStorage.getItem("data")
-
-  //     data = JSON.parse(data)
-  // }
-
-  // let status = localStorage.getItem("status");
 
   data = await fetch(`${domain}/api/keyword`);
   data = await data.json();
@@ -224,7 +212,7 @@ async function checkIfElisthere(selector, tries = 0) {
 
   console.log(selector, "not there, trying in a second. tries:=> ", tries);
 
-  await delay(1000);
+  await delay(3000);
   return checkIfElisthere(selector, tries + 1);
 }
 async function enterlocations(data) {
@@ -242,21 +230,37 @@ async function enterlocations(data) {
   }
   await delay(1000);
   console.log("enter the dragon", locations);
-  for (let i = 0; i < locations.length; i++) {
-    const location = locations[i];
+  // for (let i = 0; i < locations.length; i++) {
+    const location = locations[0];
     console.log(location, 187);
     el.focus();
     document.execCommand("insertText", false, location);
-    el.dispatchEvent(new Event("change", { bubbles: true }));
-    await checkIfElisthere(".location-info");
+    // el.dispatchEvent(new Event("change", { bubbles: true }));
+
+    // el.blur();
+    // el.dispatchEvent(new Event("click", { bubbles: true }));
+    console.log("still looking for this")
+
+    const exists = await checkIfElisthere(".location-item");
+    if(!exists){
+      document.querySelectorAll(".btn-no .content")[3].click()
+      await delay(1000)
+      document.querySelector(".location-button").click();
+      await delay(1000)
+
+      return enterlocations(data);
+    }
+    console.log("I saw it waiting 3 seconds to click")
     try {
+       await delay(500);
       document.querySelector(".location-info").click();
     } catch (error) {
       console.log(error);
       return false;
     }
     await delay(500);
-  }
+    // break
+  // }
 
   const btns = document.querySelectorAll("material-dialog .btn-yes");
 

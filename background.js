@@ -1,4 +1,4 @@
-let domain = "http://localhost:5000"; // REPLACE WITH ACTUAL BASE DOMAIN
+let domain = "http://localhost:4000"; // REPLACE WITH ACTUAL BASE DOMAIN
 async function ajaxCall(type, path, data, callback, errCallback) {
   try {
     const result = await fetch(domain + "/" + path, {
@@ -43,7 +43,8 @@ chrome.downloads.onDeterminingFilename.addListener(function (item, suggest) {
 
   if (
     item.state === "in_progress" &&
-    item.referrer === "https://ads.google.com/"
+    item.referrer === "https://ads.google.com/" &&
+    item.url.indexOf("date=") === -1
   ) {
     // Wait for a short delay before canceling the download
 
