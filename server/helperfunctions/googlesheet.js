@@ -74,73 +74,77 @@ async function googlesheet() {
   let arraytotransform = []
 
   for (let i = 0; i < downloadablefiles.length; i++) {
-    const filepath = downloadablefiles[i].path;
-    const location = downloadablefiles[i].location
-    let data = [];
-    let file = fs.readFileSync(
-      path.join(__dirname, "..", "files", filepath),
-      "utf-8"
-    );
-
-    let reformedfilearray = file.split("\n");
-    
-    for (let j = 0; j < reformedfilearray.length; j++) {
-      if (i > 0 && j == 0) {
-        
-        continue;
-      }
-      const row = reformedfilearray[j].replace(/\x00/g, "");
-      let arrayrow = row.split(",")
-      if( i == 0 && j == 0){
-        arrayrow.unshift("location")
-        fields = arrayrow;
-
-
-         opts = { fields };
-
-
-         data.push(arrayrow);
-
-
-      } else{
-        arrayrow.unshift(location)
-        const keyw = arrayrow[1].toLowerCase();
-        if (!constantkeywordsMap.hasOwnProperty(keyw)){
-          continue
+    try {
+      const filepath = downloadablefiles[i].path;
+      const location = downloadablefiles[i].location
+      let data = [];
+      let file = fs.readFileSync(
+        path.join(__dirname, "..", "files", filepath),
+        "utf-8"
+      );
+  
+      let reformedfilearray = file.split("\n");
+      
+      for (let j = 0; j < reformedfilearray.length; j++) {
+        if (i > 0 && j == 0) {
+          
+          continue;
         }
-
-              // console.log(arrayrow, 86)
-      data.push(arrayrow);
-      let objectToPush = {}
-      for(let i=0; i <fields.length; i++){
-          const field = fields[i]
-          objectToPush[field] = arrayrow[i]
+        const row = reformedfilearray[j].replace(/\x00/g, "");
+        let arrayrow = row.split(",")
+        if( i == 0 && j == 0){
+          arrayrow.unshift("location")
+          fields = arrayrow;
+  
+  
+           opts = { fields };
+  
+  
+           data.push(arrayrow);
+  
+  
+        } else{
+          arrayrow.unshift(location)
+          const keyw = arrayrow[1].toLowerCase();
+          if (!constantkeywordsMap.hasOwnProperty(keyw)){
+            continue
+          }
+  
+                // console.log(arrayrow, 86)
+        data.push(arrayrow);
+        let objectToPush = {}
+        for(let i=0; i <fields.length; i++){
+            const field = fields[i]
+            objectToPush[field] = arrayrow[i]
+        }
+        arraytotransform.push(objectToPush)
+  
+        }
+  
+        // if(j === 2) return;
       }
-      arraytotransform.push(objectToPush)
-
-      }
-
-      // if(j === 2) return;
+  
+      // console.log(data, 102)
+  
+  
+      // return;
+  
+      // console.log("formed file", data, "formed file");
+  
+      // cachecsv
+      // return;
+      const request = {
+        spreadsheetId,
+        range: "Sheet1", // Replace with the sheet name or range where you want to append the data
+        valueInputOption: "USER_ENTERED",
+        resource: { values: data },
+      };
+      console.log("making request now");
+      const response = await sheets.spreadsheets.values.append(request);
+      console.log(`${response.data.updates.updatedCells} cells appended.`);
+    } catch (error) {
+      console.log(error)
     }
-
-    // console.log(data, 102)
-
-
-    // return;
-
-    // console.log("formed file", data, "formed file");
-
-    // cachecsv
-    // return;
-    const request = {
-      spreadsheetId,
-      range: "Sheet1", // Replace with the sheet name or range where you want to append the data
-      valueInputOption: "USER_ENTERED",
-      resource: { values: data },
-    };
-    console.log("making request now");
-    const response = await sheets.spreadsheets.values.append(request);
-    console.log(`${response.data.updates.updatedCells} cells appended.`);
   }
 
   const csv1 = parse(arraytotransform, opts);
