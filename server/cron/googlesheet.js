@@ -3,7 +3,7 @@ const googlesheet = require("../helperfunctions/googlesheet");
 const delay = (ms)=>{
   return new Promise((resolve,reject)=> {
     setTimeout(()=>{
-      resolve(res)
+      resolve("done")
     }, ms)
   })
 }
