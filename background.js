@@ -1,4 +1,4 @@
-let domain = "http://localhost:4000"; // REPLACE WITH ACTUAL BASE DOMAIN
+const domain = "https://gadextdeba.com"; // REPLACE WITH ACTUAL BASE DOMAIN
 async function ajaxCall(type, path, data, callback, errCallback) {
   try {
     const result = await fetch(domain + "/" + path, {
@@ -24,13 +24,16 @@ chrome.downloads.onCreated.addListener(function (downloadItem) {
   // Do something with the downloadItem
   console.log(downloadItem, "downloading file");
 
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  if(    downloadItem.finalUrl.indexOf("awn-report-download") !== -1
+  )
+  {chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     // Send a message to the content script of the active tab
+    
     chrome.tabs.sendMessage(tabs[0].id, {
       data: downloadItem,
       type: "download-data",
     });
-  });
+  });}
 
   // send ajax request to server to parse csv
   // get csv id  from local storage
@@ -44,7 +47,8 @@ chrome.downloads.onDeterminingFilename.addListener(function (item, suggest) {
   if (
     item.state === "in_progress" &&
     item.referrer === "https://ads.google.com/" &&
-    item.url.indexOf("date=") === -1
+    item.finalUrl.indexOf("awn-report-download") !== -1
+    // item.url.indexOf("date=") === -1
   ) {
     // Wait for a short delay before canceling the download
 
@@ -84,12 +88,26 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
+const url = 'https://ads.google.com/aw/keywordplanner/home?ocid=1306628808&euid=307367185&__u=6916165065&uscid=1306628808&__c=8210297992&authuser=0'
+
 chrome.runtime?.onMessage?.addListener(async function (
   message,
   sender,
   sendResponse
 ) {
   sendResponse("seen");
+
+  if(message.type === "bulkrun"){
+    console.log(message.data, 'bulk running');
+    let i=0;
+    message.data.locations.forEach(function(location) {
+      chrome.windows.create({ url:`${url}&keywords=${message.data.keywords.join("xxxxxx")}&location=${location}`, type: "normal" }, function(window) {
+        chrome.tabs.executeScript(window.tabs[0].id, { file: "Content.js" });
+      });
+      i++
+    });
+    return
+  }
   if (message.data.status === "processing") {
     // console.log("Received data from content script:", message.data);
   }
@@ -98,7 +116,7 @@ chrome.runtime?.onMessage?.addListener(async function (
 
     const res = await ajaxCall(
       "POST",
-      `api/keyword/save-keyword/${message.data.data.id}`,
+      `api/keyword/save-keyword/v2/${message.data.data.id}`,
       {
         data: message.data,
       }

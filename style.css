@@ -244,6 +244,8 @@
     padding: none;
     list-style: none;
     /* margin: auto; */
+    height: 300px;
+    overflow-y: auto;
     max-width: 1200px;
 }
 

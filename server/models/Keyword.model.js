@@ -18,6 +18,9 @@ const Keyword = new mongoose.Schema(
       },
       location: {
         type: String
+      },
+      keywords:{
+        type: String
       }
     }],
     status: {

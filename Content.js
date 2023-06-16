@@ -1,4 +1,4 @@
-const domain = "http://localhost:4000";
+const domain = "https://gadextdeba.com";
 
 // event listeners
 
@@ -33,6 +33,13 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     // if (!data) return console.log("data not found");
 
     // data = JSON.parse(data);
+    var url = new URL(window.location.href);
+
+    // Get the search parameters from the URL
+    var searchParams = new URLSearchParams(url.search);
+    let location = searchParams.get("location");
+    let keywords = searchParams.get("kewords");
+
     let downloadItem = message.data;
     // console.log(status, 15)
     chrome.runtime.sendMessage({
@@ -40,6 +47,8 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       data: {
         downloadItem,
         data: "",
+        keywords: keywords.split("xxxxxx") ,
+        location
       },
     });
 
@@ -71,7 +80,29 @@ function errorhandler(message = "") {
 
 async function keywordplaninit(data) {
 
+  var url = new URL(window.location.href);
 
+  // Get the search parameters from the URL
+  var searchParams = new URLSearchParams(url.search);
+  
+  // Retrieve a specific query parameter by name
+  var keywords = searchParams.get("keywords");
+  let location = searchParams.get("location");
+  
+
+  
+  // Log the parameter value to the console
+  console.log(keywords, "keyword ");
+  if(!keywords) return console.log("kw not available");
+  if(!location) return console.log("locations not available");
+
+
+  // let kwindex = parseInt(keyw)
+
+  keywords = keywords.split("xxxxxx")
+
+  console.log(keywords, location);
+  // return;
   data = await fetch(`${domain}/api/keyword`);
   data = await data.json();
   console.log(data, "after request");
@@ -82,13 +113,13 @@ async function keywordplaninit(data) {
     return console.log("status is not processing");
   }
 
-  chrome.runtime.sendMessage({
-    data: {
-      status: "processing",
-    },
-  });
+  // chrome.runtime.sendMessage({
+  //   data: {
+  //     status: "processing",
+  //   },
+  // });
 
-  console.log("processing request");
+  // console.log("processing request");
 
   // click on light bulb to start
 
@@ -104,7 +135,7 @@ async function keywordplaninit(data) {
 
   await delay(1000);
 
-  const remainder = await enterkeywords(data);
+  const remainder = await enterkeywords(data, keywords);
   console.log(remainder, "remainder");
   //   await delay(30000);
   localStorage.setItem("temp-remainder", JSON.stringify(remainder));
@@ -117,7 +148,7 @@ async function keywordplaninit(data) {
   console.log("time to submit");
 
   await delay(1000);
-  const result = await enterlocations(data);
+  const result = await enterlocations(data, location);
   console.log(result, "result of locations");
   if (!result) {
     errorhandler("could not enter all locations");
@@ -125,11 +156,11 @@ async function keywordplaninit(data) {
   }
   localStorage.setItem("status", "processing");
 
-  chrome.runtime.sendMessage({
-    data: {
-      status: "processing",
-    },
-  });
+  // chrome.runtime.sendMessage({
+  //   data: {
+  //     status: "processing",
+  //   },
+  // });
 
   document.querySelector(".submit-button").click();
 
@@ -157,6 +188,13 @@ async function keywordplaninit(data) {
   document.querySelector(`[aria-label="Date range, All available"]`).click();
 
   await delay(1000);
+  const refineWordButton = document.querySelector(".refine-message")
+
+  if(refineWordButton){
+    refineWordButton.click();
+    await delay(1000)
+  }
+  
   const downloadavailable = await checkIfElisthere(".expand-collapse-all");
 
   console.log(downloadavailable, "can find expand all");
@@ -184,8 +222,8 @@ async function keywordplaninit(data) {
   localStorage.setItem("PROCESSINGALREADY", "no");
 }
 
-async function enterkeywords(data) {
-  const keywords = data.keywords;
+async function enterkeywords(data, keywords) {
+  // const keywords = data.keywords;
   const remainingValues = [];
   const el = document.querySelector(".search-input");
 
@@ -215,7 +253,7 @@ async function checkIfElisthere(selector, tries = 0) {
   await delay(3000);
   return checkIfElisthere(selector, tries + 1);
 }
-async function enterlocations(data) {
+async function enterlocations(data,location) {
   const locations = data.locations;
   const el = document.querySelector(".suggest-input-container input");
   await delay(800);
@@ -231,7 +269,7 @@ async function enterlocations(data) {
   await delay(1000);
   console.log("enter the dragon", locations);
   // for (let i = 0; i < locations.length; i++) {
-    const location = locations[0];
+    // const location = locations[0];
     console.log(location, 187);
     el.focus();
     document.execCommand("insertText", false, location);

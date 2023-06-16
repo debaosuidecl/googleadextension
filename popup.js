@@ -1,5 +1,5 @@
 // state
-const domain = `http://localhost:4000`;
+const domain = "https://gadextdeba.com";
 let error = "";
 let keywords = [
   "Traeger",
@@ -54,7 +54,7 @@ keywordinputelement.addEventListener("keydown", (e) => {
       return;
     } else {
       keywords.push(keywordinputelement.value);
-      refreshKeywordList();
+      refreshKeywordList(keywords);
     }
   }
 });
@@ -65,6 +65,7 @@ generateButton.addEventListener("click", async (e) => {
 
   setErrorUI("", true);
 
+  console.log(keywords, 'the ones we want to send')
   try {
     await axios.post(`${domain}/api/keyword/schedule/${makeid(25)}`, {
       id: makeid(25),
@@ -81,17 +82,27 @@ generateButton.addEventListener("click", async (e) => {
   }
   try {
     // send request to background
-    chrome.tabs?.query({ active: true, currentWindow: true }, function (tabs) {
-      // Send a message to the content script of the active tab
-      chrome.tabs?.sendMessage(tabs[0].id, {
-        type: "start-keywordplanner",
-        id: makeid(25),
-        data: {
-          locations,
-          keywords,
-        },
-      });
+
+    chrome.runtime.sendMessage({
+      type: "bulkrun",
+      data: {
+        keywords,
+        locations
+
+      }
     });
+    // chrome.tabs?.query({ active: true, currentWindow: true }, function (tabs) {
+    //   // Send a message to the content script of the active tab
+    //   chrome.tabs?.sendMessage(tabs[0].id, {
+    //     type: "start-keywordplanner",
+    //     id: makeid(25),
+    //     data: {
+    //       locations,
+    //       keywords,
+    //     },
+    //   });
+    // });
+
   } catch (error) {
     console.log(error);
   } finally {
@@ -196,11 +207,11 @@ chrome.runtime?.onMessage?.addListener(function (
 
 // functions
 
-function refreshKeywordList() {
+function refreshKeywordList(keywordsparam) {
   keywordselement.innerHTML = ``;
   keywordinputelement.value = "";
   for (let i = 0; i < keywords.length; i++) {
-    const keyword = keywords[i];
+    const keyword = keywordsparam[i];
     keywordselement.innerHTML += `
         <div class="keyword">
               <p>${keyword} <span class="del" data-keyword="${keyword}">&#x2715;</span></p>
@@ -214,10 +225,15 @@ function refreshKeywordList() {
     const del = alldels[i];
     del.addEventListener("click", (e) => {
       const keyword = e.target.getAttribute("data-keyword");
-      keywords = keywords.filter((k) => k !== keyword);
-      refreshKeywordList();
+      keywords = keywordsparam.filter((k) => k !== keyword);
+      refreshKeywordList(keywords);
+      
     });
   }
+
+  return keywords;
+
+  // console.log(keywords, 224)
 }
 
 function setErrorUI(message, noreload) {
@@ -256,7 +272,7 @@ async function getServerData() {
     tab1items.classList.remove("hiding");
     initloader.classList.add("hiding");
     generateButton.disabled = false;
-
+    refreshKeywordList(keywords)
     return;
   }
 
@@ -269,6 +285,8 @@ async function getServerData() {
     cancelcont.classList.add("hiding");
     generateButton.disabled = false;
     generateButton.textContent = "Generate";
+    refreshKeywordList(keywords)
+
 
     return;
   }
@@ -281,6 +299,10 @@ async function getServerData() {
     generateButton.disabled = true;
     generateButton.textContent = "Generating report...";
     cancelcont.classList.remove("hiding");
+    keywords = result.data.keywords;
+    console.log("we  are scheduled,", result.data)
+    refreshKeywordList(result.data.keywords);
+
     return;
   }
   if (result.data.error) {
@@ -328,7 +350,7 @@ async function getSavedData() {
     {
       const savedkeyword = savedKeywordDataSet[i]
       savedlist.innerHTML += `
-        <li><p>Report Created on : ${formatdate(savedkeyword.createdAt)}</p><p><a href="${domain}/api/keyword/download/${savedkeyword.path}?date=${formatdate(savedkeyword.createdAt)}">Download</a></p></li>
+        <li><p>Report Created on : ${formatdate(savedkeyword.createdAt)} ${formattime(savedkeyword.createdAt)}</p><p><a target="_blank"  href="${domain}/api/keyword/download/${savedkeyword.path}?date=${formatdate(savedkeyword.createdAt)}">Download</a></p></li>
       `
 
     }
@@ -347,6 +369,10 @@ function formatdate(date){
 
   return _2digits(new Date(date).getMonth()+1) + "/" + _2digits(new Date(date).getDate()) + "/" + new Date(date).getFullYear()
 }
+function formattime(date){
+
+  return _2digits(new Date(date).getHours()) + ":" + _2digits(new Date(date).getMinutes()) + ":" + _2digits(new Date(date).getSeconds())
+}
 function statusCheck() {
   chrome.tabs?.query({ active: true, currentWindow: true }, function (tabs) {
     // Send a message to the content script of the active tab
@@ -357,7 +383,7 @@ function statusCheck() {
 }
 // INITIALIZE
 
-refreshKeywordList();
+// refreshKeywordList(keywords);
 
 // statusCheck();
 
