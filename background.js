@@ -1,4 +1,6 @@
-const domain = "https://gadextdeba.com"; // REPLACE WITH ACTUAL BASE DOMAIN
+let domain = "https://gadextdeba.com"; // REPLACE WITH ACTUAL BASE DOMAIN
+let windowIDs = [];
+
 async function ajaxCall(type, path, data, callback, errCallback) {
   try {
     const result = await fetch(domain + "/" + path, {
@@ -26,14 +28,31 @@ chrome.downloads.onCreated.addListener(function (downloadItem) {
 
   if(    downloadItem.finalUrl.indexOf("awn-report-download") !== -1
   )
-  {chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    // Send a message to the content script of the active tab
+  {
+  //   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  //   // Send a message to the content script of the active tab
     
-    chrome.tabs.sendMessage(tabs[0].id, {
+  //   chrome.tabs.sendMessage(tabs[0].id, {
+  //     data: downloadItem,
+  //     type: "download-data",
+  //   });
+  // });
+
+  chrome.windows.getCurrent(function(currentWindow) {
+    // Get the tabs in the current window
+    chrome.tabs.query({ windowId: currentWindow.id }, function(tabs) {
+      // Get the first tab
+      var firstTab = tabs[0];
+  // 
+      // Use the first tab as needed
+      console.log("First tab:", firstTab);
+      chrome.tabs.sendMessage(tabs[0].id, {
       data: downloadItem,
       type: "download-data",
     });
-  });}
+    });
+  });
+}
 
   // send ajax request to server to parse csv
   // get csv id  from local storage
@@ -62,7 +81,7 @@ chrome.downloads.onDeterminingFilename.addListener(function (item, suggest) {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log("trying to change again: ", tab, changeInfo, "changing");
+  // console.log("trying to change again: ", tab, changeInfo, "changing");
   if (changeInfo.status === "complete" && /^http/.test(tab.url)) {
     try {
       chrome.tabs.sendMessage(tabId, { type: "ping" }, function (response) {
@@ -89,6 +108,16 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 const url = 'https://ads.google.com/aw/keywordplanner/home?ocid=1306628808&euid=307367185&__u=6916165065&uscid=1306628808&__c=8210297992&authuser=0'
+function split(a, n) {
+  let newArray = [];
+  let total = a;
+  for (let i = 0; i < total.length; i++) {
+    if (a.length <= 0) return newArray;
+    newArray.push([...a.slice(0, n)]);
+    a = a.slice(n);
+  }
+  return newArray
+}
 
 chrome.runtime?.onMessage?.addListener(async function (
   message,
@@ -100,17 +129,31 @@ chrome.runtime?.onMessage?.addListener(async function (
   if(message.type === "bulkrun"){
     console.log(message.data, 'bulk running');
     let i=0;
+    const keywordsarray =  split( message.data.keywords, 10)
+
+    for (let j=0; j < keywordsarray.length; j++){
+      const  keywords = keywordsarray[j]
+      console.log(keywords, j)
     message.data.locations.forEach(function(location) {
-      chrome.windows.create({ url:`${url}&keywords=${message.data.keywords.join("xxxxxx")}&location=${location}`, type: "normal" }, function(window) {
-        chrome.tabs.executeScript(window.tabs[0].id, { file: "Content.js" });
+        chrome.windows.create({ url:`${url}&keywords=${keywords.join("xxxxxx")}&location=${location}`, type: "normal" }, function(window) {
+        windowIDs.push(window.id)
+        });
+        i++
       });
-      i++
-    });
+    }
+  
     return
   }
-  if (message.data.status === "processing") {
-    // console.log("Received data from content script:", message.data);
+  if(message.type === "cancel"){
+
+    for(let i=0; i < windowIDs.length; i++){
+      const windowId = windowIDs[i]
+      chrome.windows.remove(windowId);
+
+    }
+    windowIDs = []
   }
+
   if (message.type === "download-final") {
     console.log(message.data, "sending ajax request now");
 
@@ -122,11 +165,19 @@ chrome.runtime?.onMessage?.addListener(async function (
       }
     );
 
-    chrome.tabs?.query({ active: true, currentWindow: true }, function (tabs) {
-      // Send a message to the content script of the active tab
-      chrome.tabs?.sendMessage(tabs[0].id, {
-        type: "start-keywordplanner",
-      });
+    // chrome.tabs?.query({ active: true, currentWindow: true }, function (tabs) {
+    //   // Send a message to the content script of the active tab
+    //   chrome.tabs?.sendMessage(tabs[0].id, {
+    //     type: "start-keywordplanner",
+    //   });
+    // });
+
+    // Get the current window ID
+    chrome.windows.getCurrent(function(window) {
+      var windowId = window.id;
+
+      // Close the current window
+      chrome.windows.remove(windowId);
     });
 
     console.log(res, "response from ajax");

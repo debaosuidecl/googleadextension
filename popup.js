@@ -147,6 +147,9 @@ cancelgeneration.addEventListener("click", async (e) => {
         type: "cancel",
       });
     });
+    chrome.runtime.sendMessage({
+      type: "cancel",
+    })
   } catch (error) {
     console.log(error);
   } finally {

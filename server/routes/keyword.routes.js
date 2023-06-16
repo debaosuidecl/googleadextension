@@ -309,6 +309,8 @@ router.post("/save-keyword/v2/:id", async (req, res) => {
     }
 
 
+
+    console.log(remainingMapList, remainingMapList.length, 'remaining list')
     if(remainingMapList.length <= 0){
       const updatedKeyword = await Keyword.findOneAndUpdate(
         {},
@@ -325,15 +327,16 @@ router.post("/save-keyword/v2/:id", async (req, res) => {
         }
       );
     
-      console.log(updatedKeyword, 154);
-      res.json({
+      console.log("saved", 154);
+      return res.json({
         message: "saved",
     
         downloaditem,
         updatedKeyword,
       });
     } else{
-      res.json({
+      console.log("continuing")
+     return  res.json({
         message: "continuing",
     
         downloaditem,

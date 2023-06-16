@@ -38,7 +38,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     // Get the search parameters from the URL
     var searchParams = new URLSearchParams(url.search);
     let location = searchParams.get("location");
-    let keywords = searchParams.get("kewords");
+    let keywords = searchParams.get("keywords");
 
     let downloadItem = message.data;
     // console.log(status, 15)
@@ -195,31 +195,36 @@ async function keywordplaninit(data) {
     await delay(1000)
   }
   
-  const downloadavailable = await checkIfElisthere(".expand-collapse-all");
+  const downloadavailable = await checkIfElisthere(".expand-collapse-all", 10);
 
   console.log(downloadavailable, "can find expand all");
 
   if (!downloadavailable) {
     errorhandler("could find download trigger");
     console.log("could not find expand");
-    return false;
+    // return false;
   }
 
   document.querySelector(".download.download-menu material-button").click();
-  const csvdownloaditem = checkIfElisthere(
+  const csvdownloaditem = await checkIfElisthere(
     "material-select-item .menu-item-label-section"
-  );
+  ,10);
+  
   await delay(1000);
   if (!csvdownloaditem) {
     errorhandler("could not find csv item");
     console.log("could not find csv item");
-    return false;
+    window.location.reload()
+    // return false;
   }
 
   document
     .querySelector("material-select-item .menu-item-label-section")
     .click();
   localStorage.setItem("PROCESSINGALREADY", "no");
+  console.log("waiting for 3 minutes")
+  await delay(180000);
+  window.location.reload();
 }
 
 async function enterkeywords(data, keywords) {
@@ -279,14 +284,14 @@ async function enterlocations(data,location) {
     // el.dispatchEvent(new Event("click", { bubbles: true }));
     console.log("still looking for this")
 
-    const exists = await checkIfElisthere(".location-item");
+    const exists = await checkIfElisthere(".location-item", 15);
     if(!exists){
       document.querySelectorAll(".btn-no .content")[3].click()
       await delay(1000)
       document.querySelector(".location-button").click();
       await delay(1000)
 
-      return enterlocations(data);
+      return enterlocations(data, location);
     }
     console.log("I saw it waiting 3 seconds to click")
     try {
