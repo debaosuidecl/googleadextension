@@ -89,7 +89,7 @@ async function keywordplaninit(data) {
   var keywords = searchParams.get("keywords");
   let location = searchParams.get("location");
   
-
+ 
   
   // Log the parameter value to the console
   console.log(keywords, "keyword ");
@@ -97,7 +97,7 @@ async function keywordplaninit(data) {
   if(!location) return console.log("locations not available");
 
 
-  // let kwindex = parseInt(keyw)
+  // let kwindex = parseInt(keyw) 
 
   keywords = keywords.split("xxxxxx")
 
@@ -195,7 +195,7 @@ async function keywordplaninit(data) {
     await delay(1000)
   }
   
-  const downloadavailable = await checkIfElisthere(".expand-collapse-all", 10);
+  const downloadavailable = await checkIfElisthere(".expand-collapse-all");
 
   console.log(downloadavailable, "can find expand all");
 
@@ -223,7 +223,7 @@ async function keywordplaninit(data) {
     .click();
   localStorage.setItem("PROCESSINGALREADY", "no");
   console.log("waiting for 3 minutes")
-  await delay(180000);
+  await delay(125000);
   window.location.reload();
 }
 

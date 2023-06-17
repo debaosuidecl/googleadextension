@@ -7,6 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const SavedKeywordFileModel = require("../models/SavedKeywordFile.model");
 const {generatelocationKeywordMap} = require("../helperfunctions/generatelocationKeywordMap");
+const DownloadableFileModel = require("../models/DownloadableFile.model");
 function generateRandomVariable(length) {
   const buffer = crypto.randomBytes(length);
   const randomVariable = buffer.toString("hex");
@@ -68,7 +69,7 @@ router.post("/schedule/:id", async (req, res) => {
 
   try {
     const keywordalreadyexists = await Keyword.findOne();
-
+    await DownloadableFileModel.deleteMany();
     if (!keywordalreadyexists) {
       const newkeyword = await new Keyword({
         keywordid: id,
@@ -298,12 +299,18 @@ router.post("/save-keyword/v2/:id", async (req, res) => {
     }).lean();
     console.log(keywordupdate, 'key word update after push')
 
+    const  keywordDownloadableFile = await new DownloadableFileModel({
+      path: pathtoscrub, location: currentLocation, keywords: keywords.join("xxxxxx")
+    }).save();
+    console.log(keywordDownloadableFile, 'this is the one i created')
+
+    const alldownloadablefiles = await DownloadableFileModel.find();
    const totallocationkeywordarray =  generatelocationKeywordMap(keywordupdate);
   //  const locationkeywords
    const completedMap = {}
    const remainingMapList = []
-   for(let i=0; i < keywordupdate.downloadablefiles.length; i++){
-    const filemap = keywordupdate.downloadablefiles[i]
+   for(let i=0; i < alldownloadablefiles.length; i++){
+    const filemap = alldownloadablefiles[i]
 
 
     const locationkeywordstring = filemap.keywords + `xxxxxx${filemap.location}` ;
