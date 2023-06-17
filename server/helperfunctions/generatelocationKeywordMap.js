@@ -12,7 +12,7 @@ function generatelocationKeywordMap(keywordstructure){
     // locationkeywordmap
     for(let j=0; j < constantlocations.length; j++){
         const location = constantlocations[j]
-        locationkeywordmap[keywordstringlist + location] = 1
+        locationkeywordmap[keywordstringlist + "xxxxxx"+ location] = 1
     }
    }
 
