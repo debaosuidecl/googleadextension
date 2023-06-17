@@ -298,20 +298,23 @@ router.post("/save-keyword/v2/:id", async (req, res) => {
     }).lean();
     console.log(keywordupdate, 'key word update after push')
 
-   const locationkeywordmap =  generatelocationKeywordMap(keywordupdate);
-   const remainingMapList  =[]
+   const totallocationkeywordarray =  generatelocationKeywordMap(keywordupdate);
+  //  const locationkeywords
+   const completedMap = {}
+   const remainingMapList = []
    for(let i=0; i < keywordupdate.downloadablefiles.length; i++){
     const filemap = keywordupdate.downloadablefiles[i]
-    const locationkeywordstring = filemap.keywords;
 
-    if(!locationkeywordmap.hasOwnProperty(locationkeywordstring+ `xxxxxx${filemap.location}`)){
-      remainingMapList.push(locationkeywordstring + `xxxxxx${filemap.location}`)
+
+    const locationkeywordstring = filemap.keywords + `xxxxxx${filemap.location}` ;
+    completedMap[locationkeywordstring] = 1
+   }
+
+   for(let i=0; i < totallocationkeywordarray.length ;i++){
+    const totallocationkeyword = totallocationkeywordarray[i];
+    if(!completedMap.hasOwnProperty(totallocationkeyword)){
+      remainingMapList.push(totallocationkeyword)
     }
-
-
-
- 
-
    }
 
    console.log(remainingMapList, remainingMapList.length, 'remaining list')

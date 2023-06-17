@@ -17,7 +17,7 @@ function generatelocationKeywordMap(keywordstructure){
    }
 
 
-   return locationkeywordmap
+   return Object.keys(locationkeywordmap)
 
    
     
