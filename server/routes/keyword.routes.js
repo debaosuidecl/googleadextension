@@ -305,47 +305,49 @@ router.post("/save-keyword/v2/:id", async (req, res) => {
     const locationkeywordstring = filemap.keywords;
 
     if(!locationkeywordmap.hasOwnProperty(locationkeywordstring+ `xxxxxx${filemap.location}`)){
-      remainingMapList.push(locationkeywordstring)
+      remainingMapList.push(locationkeywordstring + `xxxxxx${filemap.location}`)
     }
 
 
 
-    console.log(remainingMapList, remainingMapList.length, 'remaining list')
-    if(remainingMapList.length <= 0){
-      const updatedKeyword = await Keyword.findOneAndUpdate(
-        {},
-        {
-          // keywords: keywordsRemaining,
-          // k,
-          scheduled: false,
-          // downloadablefiles: keywordStructure.downloadablefiles,
-          savingtogooglesheet:  true,
-          // locations: newlocations,
-        },
-        {
-          new: true,
-        }
-      );
-    
-      console.log("saved", 154);
-      return res.json({
-        message: "saved",
-    
-        downloaditem,
-        updatedKeyword,
-      });
-    } else{
-      console.log("continuing")
-     return  res.json({
-        message: "continuing",
-    
-        downloaditem,
-        updatedKeyword:  keywordupdate,
-      });
-    }
-
+ 
 
    }
+
+   console.log(remainingMapList, remainingMapList.length, 'remaining list')
+
+   if(remainingMapList.length <= 0){
+    const updatedKeyword = await Keyword.findOneAndUpdate(
+      {},
+      {
+        // keywords: keywordsRemaining,
+        // k,
+        scheduled: false,
+        // downloadablefiles: keywordStructure.downloadablefiles,
+        savingtogooglesheet:  true,
+        // locations: newlocations,
+      },
+      {
+        new: true,
+      }
+    );
+  
+    console.log("saved", 154);
+    return res.json({
+      message: "saved",
+  
+      downloaditem,
+      updatedKeyword,
+    });
+  } else{
+    console.log("continuing")
+   return  res.json({
+      message: "continuing",
+  
+      downloaditem,
+      updatedKeyword:  keywordupdate,
+    });
+  }
 
 
   } catch (error) {
