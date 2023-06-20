@@ -81,7 +81,17 @@
 
 .inputcont2 input {
     width: 100%;
+    
 }
+.inputcont3 input {
+    width: 100%;
+    color: grey;
+    outline: none;
+    
+    padding: 10px 2px;
+
+}
+
 
 .locations {}
 

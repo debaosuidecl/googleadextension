@@ -44,6 +44,8 @@ const homenav = document.querySelector("#home")
 const livenav = document.querySelector("#live")
 const savednav = document.querySelector("#saved")
 const savedlist = document.querySelector("#saveddata")
+const clearAll = document.querySelector("#clearAll")
+const initurlel = document.querySelector("#initurl")
 //  eventlistners
 
 keywordinputelement.addEventListener("keydown", (e) => {
@@ -72,6 +74,8 @@ generateButton.addEventListener("click", async (e) => {
 
       locations,
       keywords,
+      initurl: initurlel.value
+
     });
     cancelcont.classList.remove("hiding");
   } catch (error) {
@@ -87,7 +91,8 @@ generateButton.addEventListener("click", async (e) => {
       type: "bulkrun",
       data: {
         keywords,
-        locations
+        locations,
+        initurl: initurlel.value
 
       }
     });
@@ -109,6 +114,11 @@ generateButton.addEventListener("click", async (e) => {
     // loadcont.classList.remove("show")
   }
 });
+
+clearAll.addEventListener("click", ()=>{
+  keywords = []
+  refreshKeywordList()
+})
 
 cancelgeneration.addEventListener("click", async (e) => {
   loadcont.classList.add("show");
@@ -289,6 +299,8 @@ async function getServerData() {
     generateButton.disabled = false;
     generateButton.textContent = "Generate";
     refreshKeywordList(keywords)
+    initurlel.value = result.data.initurl;
+
 
 
     return;
@@ -302,9 +314,11 @@ async function getServerData() {
     generateButton.disabled = true;
     generateButton.textContent = "Generating report...";
     cancelcont.classList.remove("hiding");
+    initurlel.value = result.data.initurl;
     keywords = result.data.keywords;
     console.log("we  are scheduled,", result.data)
     refreshKeywordList(result.data.keywords);
+
 
     return;
   }

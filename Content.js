@@ -1,4 +1,70 @@
+console.log("pre xml request");
+
+// XMLHttpRequest.prototype.send = function(value) {
+//     this.addEventListener("progress", function(){
+//         console.log("Loading. Here you can intercept...", value);
+
+//         if (value.indexOf("report_download_id") !== -1) {
+//             let valueofdownloadid = value.split(`{"1":"report_download_id","2":"`)[1].split(`"`)[0];
+//             console.log(valueofdownloadid, 330);
+//         }
+//     }, false);
+//     this.realSend(value);
+// };
+// XMLHttpRequest.prototype.realSend = XMLHttpRequest.prototype.send;
+
+// Store the original methods
+// var originalOpen = XMLHttpRequest.prototype.open;
+// var originalSend = XMLHttpRequest.prototype.send;
+
+// // Override the open method
+// XMLHttpRequest.prototype.open = function(method, url, async) {
+//   // Your interception logic here
+//   console.log('Intercepted request:', method, url);
+
+//   // Call the original open method
+//   originalOpen.apply(this, arguments);
+// };
+
+// // Override the send method
+// XMLHttpRequest.prototype.send = function(data) {
+//   // Your interception logic here
+//   console.log('Intercepted request payload:', data);
+
+//   // Call the original send method
+//   originalSend.apply(this, arguments);
+// };
+
+
+
+// To intercept requests made with the fetch function in JavaScript, you can override the global fetch function. Here's an example of how you can achieve this:
+
+// javascript
+// Copy code
+// Store the original fetch function
+// var originalFetch = window.fetch;
+
+// // Override the fetch function
+// window.fetch = function(url, options) {
+//   // Your interception logic here
+//   console.log('Intercepted request:', url, options);
+
+//   // Call the original fetch function
+//   return originalFetch.apply(this, arguments);
+// };
+
+var s = document.createElement('script');
+s.src = chrome.runtime.getURL('inject.js');
+s.onload = function() { this.remove(); };
+// see also "Dynamic values in the injected code" section in this answer
+(document.head || document.documentElement).appendChild(s);
+
+console.log("post xml request");
+
 const domain = "https://gadextdeba.com";
+
+
+
 
 // event listeners
 
@@ -41,16 +107,30 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     let keywords = searchParams.get("keywords");
 
     let downloadItem = message.data;
-    // console.log(status, 15)
+    let downloadid = message.downloadid
+
+    let valueid = document.querySelector(`#valueofdownloadid`);
+    console.log(valueid, 113)
+
+    // console.log(valueid.textContent,downloadid, downloadItem, location, keywords,112)
+
+
+    if(valueid.textContent == downloadid){
+      console.log("download item now")
+          // console.log(status, 15)
     chrome.runtime.sendMessage({
       type: "download-final",
       data: {
         downloadItem,
         data: "",
         keywords: keywords.split("xxxxxx") ,
-        location
+        location,
+        windowId: message.windowId,
       },
     });
+    }
+
+
 
     return;
   }
@@ -76,7 +156,17 @@ function errorhandler(message = "") {
   });
 }
 
-// let PROCESSINGALREADY = false;
+
+
+  // XMLHttpRequest.prototype.send() console.log("sent stuff")
+document.addEventListener("DOMContentLoaded", function() {
+  // Your code here
+  // XMLHttpRequest.prototype.realSend = XMLHttpRequest.prototype.send;
+  // ...
+  console.log("dom content loaded")
+  // let PROCESSINGALREADY = false;
+
+});
 
 async function keywordplaninit(data) {
 
@@ -96,7 +186,7 @@ async function keywordplaninit(data) {
   if(!keywords) return console.log("kw not available");
   if(!location) return console.log("locations not available");
 
-
+  
   // let kwindex = parseInt(keyw) 
 
   keywords = keywords.split("xxxxxx")
@@ -223,8 +313,9 @@ async function keywordplaninit(data) {
     .click();
   localStorage.setItem("PROCESSINGALREADY", "no");
   console.log("waiting for 3 minutes")
-  await delay(125000);
-  window.location.reload();
+  await delay(185000);
+  console.log("waiting for 3 minutes")
+  // window.location.reload();
 }
 
 async function enterkeywords(data, keywords) {
@@ -318,4 +409,3 @@ async function enterlocations(data,location) {
 
 keywordplaninit();
 
-console.log("connected");

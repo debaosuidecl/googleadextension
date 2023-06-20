@@ -11,7 +11,12 @@
         "scripting",
         "tabs",
         "downloads",
-        "debugger"
+        "debugger",
+        "declarativeNetRequest",
+        "declarativeNetRequestFeedback"
+      
+    
+
     ],
     "action": {
         "default_popup": "popup.html",
@@ -28,7 +33,8 @@
                 "style.css",
                 "popup.js",
                 "helperfunctions.js",
-                "axios.js"
+                "axios.js",
+                "inject.js"
             ],
             "matches": [
                 "<all_urls>"

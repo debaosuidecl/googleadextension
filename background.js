@@ -1,6 +1,11 @@
 let domain = "https://gadextdeba.com"; // REPLACE WITH ACTUAL BASE DOMAIN
 let windowIDs = [];
-
+let windowObjects = {}
+let constantLocations = []
+let keywordsarray = []
+let constantkeywordsarray = []
+let downloadList = [];
+let creationDetails = []
 async function ajaxCall(type, path, data, callback, errCallback) {
   try {
     const result = await fetch(domain + "/" + path, {
@@ -22,13 +27,24 @@ async function ajaxCall(type, path, data, callback, errCallback) {
     return error;
   }
 }
-chrome.downloads.onCreated.addListener(function (downloadItem) {
+async function delay(ms) {
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      res("done");
+    }, ms);
+  });
+}
+chrome.downloads.onCreated.addListener(async function (downloadItem) {
   // Do something with the downloadItem
   console.log(downloadItem, "downloading file");
 
-  if(    downloadItem.finalUrl.indexOf("awn-report-download") !== -1
+  if(    
+    downloadItem.finalUrl.indexOf("awn-report-download") !== -1
   )
   {
+    console.log("waiting for 5 seconds")
+    await delay(5000)
+
   //   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
   //   // Send a message to the content script of the active tab
     
@@ -37,21 +53,60 @@ chrome.downloads.onCreated.addListener(function (downloadItem) {
   //     type: "download-data",
   //   });
   // });
+//   let windowId = downloadList.shift();
 
-  chrome.windows.getCurrent(function(currentWindow) {
+//   // chrome.windows.get(windowId, function(window) {
+//   //   // Use the window object as needed
+//   //   console.log("Window:", window);
+
+//   // });
+//   chrome.tabs.query({ windowId}, function(tabs) {
+//     // Get the first tab
+//     var firstTab = tabs[0];
+// // 
+//     // Use the first tab as needed
+//     console.log("First tab:", firstTab);
+//     chrome.tabs.sendMessage(tabs[0].id, {
+//     data: downloadItem,
+//     type: "download-data",
+//   });
+//   });
+
+// chrome.tabs.query({ url: downloadItem.url }, function(tabs) {
+//     if (tabs.length > 0) {
+//       var tabId = tabs[0].id;
+
+//       // Use the tabId as needed
+//       console.log("Download from Tab ID:", tabId);
+//     }
+//   });
+
+
+
+  // chrome.windows.getCurrent(function(currentWindow) {
     // Get the tabs in the current window
-    chrome.tabs.query({ windowId: currentWindow.id }, function(tabs) {
-      // Get the first tab
-      var firstTab = tabs[0];
-  // 
-      // Use the first tab as needed
-      console.log("First tab:", firstTab);
-      chrome.tabs.sendMessage(tabs[0].id, {
-      data: downloadItem,
-      type: "download-data",
+    const downloadid = downloadItem.finalUrl.split("/download/")[1].split("/Keyword")[0]
+  
+    chrome.windows.getAll({ populate: true },  async function(windows) {
+
+      // Process the windows
+      windows.forEach(async function(window) {
+        // Access window properties
+        console.log('Window ID:', window.id);
+        console.log('Window Type:', window.type);
+        console.log('Window Tabs:', window.tabs);
+      chrome.tabs.sendMessage(window.tabs[0].id, {
+        data: downloadItem,
+        downloadid,
+        windowId:  window.id,
+        type: "download-data",
     });
+        // ...
+      });
     });
-  });
+
+
+
 }
 
   // send ajax request to server to parse csv
@@ -118,29 +173,63 @@ function split(a, n) {
   }
   return newArray
 }
+function runBulkRun(message, start = false){
+  if(start){
+    console.log(message.data, 'bulk running');
+    let i=0;
+    constantkeywordsarray = message.data.keywords;
+     keywordsarray =  split( message.data.keywords, 10)
+    constantLocations = [...message.data.locations]
+    console.log({constantLocations})
+    
+    
+    for (let j=0; j < keywordsarray.length; j++){
+      const  keywords = keywordsarray[j]
+      console.log(keywords, j)
+    message.data.locations.forEach(function(location) {
+        creationDetails.push({ url:`${url}&keywords=${keywords.join("xxxxxx")}&location=${location}`, type: "normal" })
+        i++
+      });
+    }
+  }
 
+ let chromeexexutionnow =  creationDetails.slice(0,3)
+ creationDetails = creationDetails.slice(3);
+
+ chromeexexutionnow.forEach(obj=>{
+  chrome.windows.create(obj, function(window) {
+    windowIDs.push(window.id)
+    downloadList.push(window.id)
+    });
+ })
+
+}
 chrome.runtime?.onMessage?.addListener(async function (
   message,
   sender,
   sendResponse
 ) {
+
+
+  if (message.action === 'getWindowId') {
+    // Get the window ID from the sender
+    var windowId = sender.tab.windowId;
+    
+    // Send the window ID as a response
+    sendResponse({ windowId: windowId });
+    return;
+  }
+  if (message.action === 'setDownloadObject') {
+    // console.log("updated windowObjects")
+    windowObjects[message.payload.valueofdownloadid] =  message.payload.windowId;
+    console.log("updated windowObjects", windowObjects, 173)
+
+  }
   sendResponse("seen");
 
   if(message.type === "bulkrun"){
-    console.log(message.data, 'bulk running');
-    let i=0;
-    const keywordsarray =  split( message.data.keywords, 10)
-
-    for (let j=0; j < keywordsarray.length; j++){
-      const  keywords = keywordsarray[j]
-      console.log(keywords, j)
-    message.data.locations.forEach(function(location) {
-        chrome.windows.create({ url:`${url}&keywords=${keywords.join("xxxxxx")}&location=${location}`, type: "normal" }, function(window) {
-        windowIDs.push(window.id)
-        });
-        i++
-      });
-    }
+      runBulkRun(message, true)
+    
   
     return
   }
@@ -173,12 +262,23 @@ chrome.runtime?.onMessage?.addListener(async function (
     // });
 
     // Get the current window ID
-    chrome.windows.getCurrent(function(window) {
-      var windowId = window.id;
+    // chrome.windows.getCurrent(function(window) {
+    //   var windowId = window.id;
 
       // Close the current window
-      chrome.windows.remove(windowId);
-    });
+      console.log("close window: ", windowId)
+      chrome.windows.remove(message.data.windowId);
+      windowIDs = windowIDs.filter(v=> v!= message.data.windowId)
+      console.log(windowIDs, 'wids after close')
+      if(windowIDs.length <= 0){
+        runBulkRun({
+          data: {
+            locations: constantLocations,
+            keywords: constantkeywordsarray
+          }
+        })
+      }
+    // });
 
     console.log(res, "response from ajax");
 
@@ -192,3 +292,5 @@ chrome.runtime?.onMessage?.addListener(async function (
     }
   }
 });
+
+

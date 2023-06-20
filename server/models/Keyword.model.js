@@ -8,6 +8,9 @@ const Keyword = new mongoose.Schema(
     scheduled: {
       type: Boolean,
     },
+    initurl:{
+      type: String,
+    },
     savingtogooglesheet: {
       type: Boolean,
       default: false,

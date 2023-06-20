@@ -65,7 +65,7 @@ router.get("/download/:filename", async (req, res) => {
 router.post("/schedule/:id", async (req, res) => {
   console.log(req.body, req.params);
 
-  const { id, locations, keywords } = req.body;
+  const { id, locations, keywords , initurl = ""} = req.body;
 
   try {
     const keywordalreadyexists = await Keyword.findOne();
@@ -78,6 +78,7 @@ router.post("/schedule/:id", async (req, res) => {
         constantkeywords: keywords,
         keywords,
         scheduled: true,
+        initurl,
         savingtogooglesheet: false,
       }).save();
 
@@ -95,7 +96,7 @@ router.post("/schedule/:id", async (req, res) => {
           locations,
           constantlocations: locations,
           constantkeywords: keywords,
-
+          initurl,
 
           error: "",
           downloadablefiles: [],
