@@ -162,7 +162,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
-const url = 'https://ads.google.com/aw/keywordplanner/home?ocid=1306628808&euid=307367185&__u=6916165065&uscid=1306628808&__c=8210297992&authuser=0'
+let url = ''
 function split(a, n) {
   let newArray = [];
   let total = a;
@@ -175,6 +175,8 @@ function split(a, n) {
 }
 function runBulkRun(message, start = false){
   if(start){
+
+    url = message.data.initurl;
     console.log(message.data, 'bulk running');
     let i=0;
     constantkeywordsarray = message.data.keywords;
